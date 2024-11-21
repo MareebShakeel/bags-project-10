@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Checkout</title>
+    <link rel="stylesheet" href="css/cart.css">
+    <script src="cart.js" defer></script>
+</head>
+<body>
+    <div class="cart-page">
+        <header class="cart-header">
+            <div class="logo">
+                <h1>Your Cart</h1>
+            </div>
+            <div class="cart-actions">
+                <a href="home.html" class="continue-shopping">Continue Shopping</a>
+            </div>
+        </header>
+
+        <!-- Cart Items -->
+        <section id="cart-items">
+            <h2>Your Cart Items</h2>
+            <div id="cart-container" class="cart-container">
+                <!-- Cart items will be inserted here dynamically -->
+            </div>
+        </section>
+
+        <!-- Cart Summary -->
+        <section id="cart-summary">
+            <h3>Cart Summary</h3>
+            <div class="summary-item">
+                <p>Total Items: <span id="total-items">0</span></p>
+                <p>Total Price: $<span id="total-price">0.00</span></p>
+            </div>
+
+            <!-- Customer Information Form -->
+            <div class="customer-info">
+                <h3>Customer Information</h3>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Shipping Address</label>
+                        <textarea id="address" name="address" required placeholder="Enter your address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+                    <button type="submit" class="checkout-btn">Proceed to Checkout</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Fetch cart data from localStorage or initialize an empty cart
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Function to render cart items
+        function renderCartItems() {
+            const cartContainer = document.getElementById('cart-container');
+            const totalItemsElement = document.getElementById('total-items');
+            const totalPriceElement = document.getElementById('total-price');
+
+            // Clear previous items
+            cartContainer.innerHTML = '';
+
+            let totalItems = 0;
+            let totalPrice = 0;
+
+            cart.forEach((item, index) => {
+                // Create cart item element
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('cart-item');
+                itemElement.innerHTML = `
+                    <div class="item-image">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="item-details">
+                        <p class="item-name">${item.name}</p>
+                        <p class="item-price">$${item.price}</p>
+                        <p class="item-quantity">Quantity: ${item.quantity}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                    </div>
+                `;
+
+                // Append to cart container
+                cartContainer.appendChild(itemElement);
+
+                // Update total items and price
+                totalItems += item.quantity;
+                totalPrice += item.price * item.quantity;
+            });
+
+            // Update summary
+            totalItemsElement.textContent = totalItems;
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            // Remove the item from cart array
+            cart.splice(index, 1);
+
+            // Save the updated cart back to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Re-render cart items
+            renderCartItems();
+        }
+
+        // Checkout form submission
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const email = document.getElementById('email').value;
+
+            if (!cart.length) {
+                alert('Your cart is empty. Please add items before proceeding to checkout.');
+                return;
+            }
+
+            alert(`Thank you for your purchase, ${name}! Your order will be shipped to ${address}. We will contact you at ${email}.`);
+
+            // Clear the cart after checkout
+            localStorage.removeItem('cart');
+            cart = [];
+            renderCartItems();
+        });
+
+        // Initial render of cart items
+        window.onload = renderCartItems;
+    </script>
+
+    <style>
+        /* Basic styling for the checkout page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .cart-page {
+            width: 80%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: grey;
+            padding: 10px;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .cart-header .logo h1 {
+            margin: 0;
+        }
+
+        .cart-header .cart-actions a {
+            text-decoration: none;
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .cart-header .cart-actions a:hover {
+            background-color: #c13c1b;
+        }
+
+        #cart-items h2, #cart-summary h3 {
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f1f1;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .cart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid #f1f1f1;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .item-image img {
+            max-width: 100px;
+            border-radius: 5px;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .item-price {
+            font-size: 1.1em;
+            color: #007bff;
+        }
+
+        .item-quantity {
+            color: #555;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: black;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .customer-info {
+            margin-top: 30px;
+        }
+
+        .customer-info form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        .checkout-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .checkout-btn:hover {
+            background-color: #218838;
+        }
+
+        .continue-shopping {
+            text-decoration: none;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .continue-shopping:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</body>
+</html>
